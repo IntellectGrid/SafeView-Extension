@@ -67,6 +67,35 @@ const attachObserversListener = () => {
         } else {
             // if observing isn't already started, start it
             if (!mutationObserver) startObserving();
+            // Re-scan existing DOM to apply new image/video toggles without requiring page reload
+            try {
+                processNode(document, (node) => observeNode(node, false));
+            } catch (e) {}
+        }
+    });
+    // hide/show video detection dynamically
+    listenToEvent("hideVideoToggleChanged", () => {
+        if (!_settings) return;
+        if (_settings.getSettings()?.hideVideoToggle) {
+            // disable currently processing videos
+            videosInProcess
+                .filter(
+                    (video) =>
+                        video.dataset.HBstatus === STATUSES.PROCESSING &&
+                        !video.paused &&
+                        video.currentTime > 0
+                )
+                .forEach((video) => disableVideo(video));
+        } else {
+            // re-enable previously disabled videos
+            videosInProcess
+                .filter(
+                    (video) =>
+                        video.dataset.HBstatus === STATUSES.DISABLED &&
+                        !video.paused &&
+                        video.currentTime > 0
+                )
+                .forEach((video) => enableVideo(video));
         }
     });
 

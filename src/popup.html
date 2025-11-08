@@ -172,6 +172,33 @@
             transition: all 0.2s;
         }
         .footer-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .blur-timeout-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .blur-timeout-group select {
+            flex: 1;
+            padding: 8px;
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .blur-timeout-group select:hover {
+            border-color: rgba(148, 163, 184, 0.5);
+            background: rgba(30, 41, 59, 0.9);
+        }
+        .blur-timeout-group select:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+        }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 3px; }
@@ -181,7 +208,13 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <div class="logo"></div>
+            <div class="logo" aria-hidden="true">
+                <!-- SafeView shield icon (reused from install.html) -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
+                    <path d="M12 2l7 3v5c0 5-3.5 9.7-7 12-3.5-2.3-7-7-7-12V5l7-3z" fill="#e6f8ff" opacity="0.95"/>
+                    <path d="M9.5 11.5c.5-1 1.6-1.6 2.5-1.6 1.8 0 3 1.6 3 3.1 0 1.8-1.6 3.5-3.6 3.5-1 0-2.1-.6-2.6-1.6-.3-.6-.3-1.2.2-2.1.2-.3.2-.3.3-.2z" fill="#06486b"/>
+                </svg>
+            </div>
             <h1>SafeView</h1>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -250,10 +283,26 @@
             <div class="card-content" id="advanced-content" style="display: block;">
                 <div class="setting-row">
                     <span style="color: #e2e8f0; font-weight: 500;">Blur on load</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" name="blurryStartMode">
-                        <span class="toggle-slider"></span>
-                    </label>
+                    <div class="blur-timeout-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="blurryStartMode">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <select name="blurryStartTimeout">
+                            <option value="1000">1s</option>
+                            <option value="2000">2s</option>
+                            <option value="3000">3s</option>
+                            <option value="4000">4s</option>
+                            <option value="5000">5s</option>
+                            <option value="6000">6s</option>
+                            <option value="7000" selected>7s</option>
+                            <option value="8000">8s</option>
+                            <option value="9000">9s</option>
+                            <option value="10000">10s</option>
+                            <option value="12000">12s</option>
+                            <option value="15000">15s</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="setting-row">
                     <span style="color: #e2e8f0; font-weight: 500;">Hide video detection toggle</span>

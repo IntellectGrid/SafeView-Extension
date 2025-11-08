@@ -64,6 +64,10 @@ class Settings {
         return this._settings.blurryStartMode;
     }
 
+    getBlurryStartTimeout() {
+        return this._settings.blurryStartTimeout ?? 7000; // default 7 seconds
+    }
+
     getBlurAmount() {
         if (!this.shouldDetect()) return 0;
         return this._settings.blurAmount;
@@ -143,6 +147,22 @@ class Settings {
                 break;
             case "gray":
                 emitEvent("changeGray", this);
+                break;
+            case "blurryStartTimeout":
+                // propagate event to update animation timeout
+                emitEvent("changeBlurryStartTimeout", this);
+                break;
+            case "blurImages":
+            case "blurVideos":
+            case "unblurImages":
+            case "unblurVideos":
+            case "strictness":
+                // these affect style or detection; reuse toggle event to recalc stylesheet
+                emitEvent("toggleOnOffStatus", this);
+                break;
+            case "hideVideoToggle":
+                // propagate event so observers can hide/show video detection dynamically
+                emitEvent("hideVideoToggleChanged", this);
                 break;
         }
     }

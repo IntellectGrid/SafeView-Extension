@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS = {
     unblurVideos: false,
     gray: true,
     strictness: 0.1, // goes from 0 to 1
+    blurryStartTimeout: 7000, // milliseconds (7 seconds default)
 };
 
 export const STATUSES = {

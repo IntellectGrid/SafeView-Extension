@@ -49,6 +49,7 @@ function ensureDefaultSettings() {
     if (typeof settings.unblurImages === 'undefined') settings.unblurImages = false;
     if (typeof settings.unblurVideos === 'undefined') settings.unblurVideos = false;
     if (typeof settings.hideVideoToggle === 'undefined') settings.hideVideoToggle = false;
+    if (typeof settings.blurryStartTimeout === 'undefined') settings.blurryStartTimeout = 7000;
 }
 
 function displaySettings(settings) {
@@ -56,6 +57,8 @@ function displaySettings(settings) {
     // Use nullish coalescing so 0 is respected and no unintended fallback
     setRange("blurAmount", (settings.blurAmount ?? 20));
     setRange("strictness", (settings.strictness ?? 0.2));
+    // blurryStartTimeout is a select control in the UI
+    setSelect("blurryStartTimeout", (settings.blurryStartTimeout ?? 7000));
     setCheckbox("gray", settings.gray !== false);
     setCheckbox("blurImages", settings.blurImages !== false);
     setCheckbox("blurVideos", settings.blurVideos !== false);
@@ -73,6 +76,11 @@ function setCheckbox(name, checked) {
 
 function setRange(name, value) {
     const el = document.querySelector(`input[name="${name}"]`);
+    if (el) el.value = value;
+}
+
+function setSelect(name, value) {
+    const el = document.querySelector(`select[name="${name}"]`);
     if (el) el.value = value;
 }
 
@@ -125,6 +133,22 @@ function addListeners() {
         // Save on change event (when user releases slider)
         el.addEventListener("change", () => {
             saveSettings();
+        });
+    });
+
+    // handle select controls (e.g. blurryStartTimeout)
+    document.querySelectorAll("select").forEach(el => {
+        el.addEventListener('change', () => {
+            const key = el.name;
+            // timeout values are integers (ms)
+            const value = parseInt(el.value, 10);
+            settings[key] = value;
+
+            // persist immediately
+            saveSettings();
+
+            // notify other scripts
+            sendMsg(key);
         });
     });
 }

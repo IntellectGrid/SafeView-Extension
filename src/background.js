@@ -12,6 +12,7 @@ const defaultSettings = {
     unblurVideos: false,
     gray: true,
     strictness: 0.2, // goes from 0 to 1,
+    blurryStartTimeout: 7000, // milliseconds (7 seconds default)
     whitelist: [],
 };
 
@@ -73,6 +74,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome?.offscreen?.closeDocument();
         // recreate the offscreen document
         createOffscreenDoc();
+    } else if (request.type === "updateSettings") {
+        // react to live setting changes for context menu visibility
+        const { key, value } = request.newSetting || {};
+        if (key === "hideVideoToggle") {
+            // hide or show the context menu
+            chrome.contextMenus.update("enable-detection", {
+                enabled: !value,
+                title: value
+                    ? "Video detection toggle hidden"
+                    : "Enable for this video",
+            });
+        }
+        if (key === "status" || key === "blurVideos") {
+            // recompute enable state only if not hidden
+            chrome.storage.sync.get(["hb-settings"], (result) => {
+                const s = result["hb-settings"] || {};
+                if (s.hideVideoToggle) return; // keep hidden state
+                const isVideoEnabled = s.status && s.blurVideos;
+                chrome.contextMenus.update("enable-detection", {
+                    enabled: isVideoEnabled,
+                    checked: isVideoEnabled,
+                    title: isVideoEnabled
+                        ? "Enabled for this video"
+                        : "Please enable video detection in settings",
+                });
+            });
+        }
     }
 });
 

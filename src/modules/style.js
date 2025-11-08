@@ -3,8 +3,8 @@
 
 import { emitEvent, listenToEvent } from "./helpers.js";
 
-const BLURRY_START_MODE_TIMEOUT = 7000; // TODO: make this a setting maybe?
 let hbStyleSheet, blurryStartStyleSheet, _settings;
+
 
 const initStylesheets = ({ detail }) => {
     _settings = detail;
@@ -18,7 +18,9 @@ const setStyle = ({ detail: settings }) => {
     _settings = settings;
     // console.log("HB==SET STYLE")
     if (!hbStyleSheet) {
-        initStylesheets();
+        hbStyleSheet = document.createElement("style");
+        hbStyleSheet.id = "hb-stylesheet";
+        document.head.appendChild(hbStyleSheet);
     }
     if (!_settings.shouldDetect()) {
         hbStyleSheet.innerHTML = "";
@@ -30,39 +32,38 @@ const setStyle = ({ detail: settings }) => {
     const shouldUnblurVideosOnHover = _settings.shouldUnblurVideos();
 
     let blurSelectors = [];
-    if (shouldBlurImages) blurSelectors.push("img" + ".hb-blur");
-    if (shouldBlurVideos) blurSelectors.push("video" + ".hb-blur");
+    if (shouldBlurImages) blurSelectors.push("img.hb-blur");
+    if (shouldBlurVideos) blurSelectors.push("video.hb-blur");
     blurSelectors = blurSelectors.join(", ");
 
     let unblurSelectors = [];
     if (shouldUnblurImagesOnHover)
-        unblurSelectors.push("img" + ".hb-blur:hover");
+        unblurSelectors.push("img.hb-blur:hover");
     if (shouldUnblurVideosOnHover)
-        unblurSelectors.push("video" + ".hb-blur:hover");
+        unblurSelectors.push("video.hb-blur:hover");
     unblurSelectors = unblurSelectors.join(", ");
+    
     hbStyleSheet.innerHTML = `
     ${blurSelectors} {
       filter: blur(${_settings.getBlurAmount()}px) ${
           _settings.isGray() ? "brightness(0%)" : ""
       } !important;
-      transition: filter 0.1s ease !important;
+      transition: filter 0.3s ease !important;
       opacity: unset !important;
     }
-	
   `;
     if (unblurSelectors) {
         hbStyleSheet.innerHTML += `
-		${unblurSelectors} {
-			filter: blur(0px) ${_settings.isGray() ? "brightness(100%)" : ""} !important;
-			transition: filter 0.5s ease !important;
-			transition-delay: 1s !important;
-		  }
-	`;
+    ${unblurSelectors} {
+      filter: blur(0px) ${_settings.isGray() ? "brightness(100%)" : ""} !important;
+      transition: filter 0.3s ease !important;
+    }
+  `;
     }
 
     hbStyleSheet.innerHTML += `
 	.hb-blur-temp { 
-		animation: hb-blur-temp ${BLURRY_START_MODE_TIMEOUT}ms ease-in-out forwards !important;
+		animation: hb-blur-temp ${_settings.getBlurryStartTimeout()}ms ease-in-out forwards !important;
 	}
 
 	#hb-in-canvas {
@@ -96,6 +97,9 @@ const attachStyleListener = () => {
     listenToEvent("toggleOnOffStatus", setStyle);
     listenToEvent("changeBlurAmount", setStyle);
     listenToEvent("changeGray", setStyle);
+    listenToEvent("changeBlurryStartTimeout", setStyle);
+    // Live update style on these changes too
+    listenToEvent("hideVideoToggleChanged", setStyle);
 };
 
 export { attachStyleListener, applyBlurryStart, removeBlurryStart };
