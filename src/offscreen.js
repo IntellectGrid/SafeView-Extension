@@ -3,17 +3,33 @@ import {
     containsGenderFace,
     Detector,
 } from "./modules/detector.js";
+import OnnxDetector from "./modules/onnx_detector.js";
 import Queue from "./modules/queues.js";
 import Settings from "./modules/settings.js";
 
 var settings;
 var queue;
 var detector = new Detector();
+var onnxDetector = new OnnxDetector();
+var currentRuntime = 'tfjs'; // track which runtime is active
 
 const loadModels = async () => {
     try {
-        await detector.initHuman();
-        await detector.initNsfwModel();
+        // Determine which runtime to use
+        currentRuntime = settings?.getSettings()?.selectedModel || 'tfjs';
+        
+        if (currentRuntime === 'onnx_b0') {
+            console.log('Loading ONNX EfficientNet-B0 model...');
+            await onnxDetector.init();
+            // Still load human model for gender detection (if needed)
+            await detector.initHuman();
+        } else {
+            // Default TFJS runtime
+            console.log('Loading TFJS models (human + NSFW)...');
+            await detector.initHuman();
+            await detector.initNsfwModel();
+        }
+        
         detector.human.events?.addEventListener("error", (e) => {
             chrome.runtime.sendMessage({ type: "reloadExtension" });
         });
@@ -67,6 +83,13 @@ const handleVideoDetection = async (request, sender, sendResponse) => {
 
 const startListening = () => {
     settings.listenForChanges();
+    
+    // Listen for model/runtime changes
+    document.addEventListener('changeModel', async (event) => {
+        console.log('Model changed, reloading models...');
+        await loadModels();
+    });
+    
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.type === "imageDetection") {
             handleImageDetection(request, sender, sendResponse);
@@ -80,31 +103,48 @@ const startListening = () => {
 
 const runDetection = async (img, isVideo = false) => {
     if (!settings?.shouldDetect() || !img) return false;
-    const tensor = detector.human.tf.browser.fromPixels(img);
-    // console.log("tensors count", human.tf.memory().numTensors);
-    const nsfwResult = await detector.nsfwModelClassify(tensor);
-    // console.log("offscreen nsfw result", nsfwResult);
-    const strictness = settings.getStrictness() * (isVideo ? 0.75 : 1); // makes detection less strict for videos (to reduce false positives)
+    
+    const strictness = settings.getStrictness() * (isVideo ? 0.75 : 1); // less strict for videos
     activeFrame = false;
-    if (containsNsfw(nsfwResult, strictness)) {
+    
+    // Choose runtime based on current selection
+    currentRuntime = settings?.getSettings()?.selectedModel || 'tfjs';
+    
+    let nsfwResult;
+    if (currentRuntime === 'onnx_b0') {
+        // ONNX runtime: img is already an Image or canvas
+        nsfwResult = await onnxDetector.nsfwModelClassify(img);
+    } else {
+        // TFJS runtime: use existing flow
+        const tensor = detector.human.tf.browser.fromPixels(img);
+        nsfwResult = await detector.nsfwModelClassify(tensor);
+        
+        if (containsNsfw(nsfwResult, strictness)) {
+            detector.human.tf.dispose(tensor);
+            return "nsfw";
+        }
+        if (!settings.shouldDetectGender()) {
+            detector.human.tf.dispose(tensor);
+            return false;
+        }
+        const predictions = await detector.humanModelClassify(tensor);
         detector.human.tf.dispose(tensor);
+        if (
+            containsGenderFace(
+                predictions,
+                settings.shouldDetectMale(),
+                settings.shouldDetectFemale()
+            )
+        )
+            return "face";
+        return false;
+    }
+    
+    // For ONNX: only NSFW detection is supported (no gender detection yet)
+    // containsNsfw expects array of {className, probability}
+    if (containsNsfw(nsfwResult, strictness)) {
         return "nsfw";
     }
-    if (!settings.shouldDetectGender()) {
-        detector.human.tf.dispose(tensor);
-        return false; // no need to run gender detection if it's not enabled
-    }
-    const predictions = await detector.humanModelClassify(tensor);
-    // console.log("offscreen human result", predictions);
-    detector.human.tf.dispose(tensor);
-    if (
-        containsGenderFace(
-            predictions,
-            settings.shouldDetectMale(),
-            settings.shouldDetectFemale()
-        )
-    )
-        return "face";
     return false;
 };
 

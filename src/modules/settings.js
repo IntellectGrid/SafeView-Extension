@@ -68,6 +68,10 @@ class Settings {
         return this._settings.blurryStartTimeout ?? 7000; // default 7 seconds
     }
 
+    getSelectedModel() {
+        return this._settings.selectedModel ?? 'tfjs'; // default TFJS
+    }
+
     getBlurAmount() {
         if (!this.shouldDetect()) return 0;
         return this._settings.blurAmount;
@@ -151,6 +155,11 @@ class Settings {
             case "blurryStartTimeout":
                 // propagate event to update animation timeout
                 emitEvent("changeBlurryStartTimeout", this);
+                break;
+            case "selectedModel":
+                // notify listeners that the selected model/runtime changed
+                emitEvent("changeModel", this);
+                break;
                 break;
             case "blurImages":
             case "blurVideos":

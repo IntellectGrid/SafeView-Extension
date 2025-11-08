@@ -50,6 +50,7 @@ function ensureDefaultSettings() {
     if (typeof settings.unblurVideos === 'undefined') settings.unblurVideos = false;
     if (typeof settings.hideVideoToggle === 'undefined') settings.hideVideoToggle = false;
     if (typeof settings.blurryStartTimeout === 'undefined') settings.blurryStartTimeout = 7000;
+    if (typeof settings.selectedModel === 'undefined') settings.selectedModel = 'tfjs';
 }
 
 function displaySettings(settings) {
@@ -66,6 +67,7 @@ function displaySettings(settings) {
     setCheckbox("unblurImages", settings.unblurImages || false);
     setCheckbox("unblurVideos", settings.unblurVideos || false);
     setCheckbox("hideVideoToggle", settings.hideVideoToggle || false);
+    setSelect("selectedModel", settings.selectedModel ?? 'tfjs');
     updateSliderDisplay();
 }
 
@@ -136,12 +138,14 @@ function addListeners() {
         });
     });
 
-    // handle select controls (e.g. blurryStartTimeout)
+    // handle select controls (e.g. blurryStartTimeout, selectedModel)
     document.querySelectorAll("select").forEach(el => {
         el.addEventListener('change', () => {
             const key = el.name;
-            // timeout values are integers (ms)
-            const value = parseInt(el.value, 10);
+            const raw = el.value;
+            // If the value is a number string, convert to int; otherwise keep as string
+            const numeric = /^\d+$/.test(raw);
+            const value = numeric ? parseInt(raw, 10) : raw;
             settings[key] = value;
 
             // persist immediately

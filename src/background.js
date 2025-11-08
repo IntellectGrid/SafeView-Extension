@@ -13,6 +13,7 @@ const defaultSettings = {
     gray: true,
     strictness: 0.2, // goes from 0 to 1,
     blurryStartTimeout: 7000, // milliseconds (7 seconds default)
+    selectedModel: 'tfjs', // 'tfjs' or 'onnx_b0'
     whitelist: [],
 };
 

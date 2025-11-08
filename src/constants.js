@@ -11,6 +11,8 @@ export const DEFAULT_SETTINGS = {
     gray: true,
     strictness: 0.1, // goes from 0 to 1
     blurryStartTimeout: 7000, // milliseconds (7 seconds default)
+    // model selection: 'tfjs' uses existing TFJS/human model; 'onnx_b0' uses ONNX Runtime with EfficientNet-B0
+    selectedModel: 'tfjs',
 };
 
 export const STATUSES = {
