@@ -1,11 +1,12 @@
 var settings = {};
+let initialized = false;
 
-// Initialize popup when DOM is ready
-document.addEventListener('DOMContentLoaded', initPopup);
-window.addEventListener('load', initPopup);
-
-// Also run immediately in case DOM is already loaded
-initPopup();
+// Initialize popup once when DOM is ready (avoid duplicate inits)
+document.addEventListener('DOMContentLoaded', () => {
+    if (initialized) return;
+    initialized = true;
+    initPopup();
+});
 
 function initPopup() {
     loadSettingsAndDisplay();
@@ -39,7 +40,8 @@ function ensureDefaultSettings() {
     // Ensure all essential settings have default values
     if (typeof settings.status === 'undefined') settings.status = true;
     if (typeof settings.blurAmount === 'undefined') settings.blurAmount = 20;
-    if (typeof settings.strictness === 'undefined') settings.strictness = 0.3;
+    // Align with background.js default (0.2)
+    if (typeof settings.strictness === 'undefined') settings.strictness = 0.2;
     if (typeof settings.gray === 'undefined') settings.gray = true;
     if (typeof settings.blurImages === 'undefined') settings.blurImages = true;
     if (typeof settings.blurVideos === 'undefined') settings.blurVideos = true;
@@ -51,8 +53,9 @@ function ensureDefaultSettings() {
 
 function displaySettings(settings) {
     setCheckbox("status", settings.status !== false);
-    setRange("blurAmount", settings.blurAmount || 20);
-    setRange("strictness", settings.strictness || 0.3);
+    // Use nullish coalescing so 0 is respected and no unintended fallback
+    setRange("blurAmount", (settings.blurAmount ?? 20));
+    setRange("strictness", (settings.strictness ?? 0.2));
     setCheckbox("gray", settings.gray !== false);
     setCheckbox("blurImages", settings.blurImages !== false);
     setCheckbox("blurVideos", settings.blurVideos !== false);
@@ -143,9 +146,16 @@ function setupCollapsibles() {
             const id = this.getAttribute("data-toggle");
             const content = document.getElementById(id);
             const icon = this.querySelector(".collapse-icon");
-            if (content) {
+            if (content && icon) {
                 content.classList.toggle("collapsed");
                 icon.classList.toggle("open");
+                
+                // Toggle display visibility
+                if (content.classList.contains("collapsed")) {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
             }
         });
     });

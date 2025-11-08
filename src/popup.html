@@ -202,16 +202,16 @@
             <div class="slider-container">
                 <div class="slider-header">
                     <span class="slider-header-label">Blur Intensity</span>
-                    <span class="slider-value" id="blur-value">50%</span>
+                    <span class="slider-value" id="blur-value">20%</span>
                 </div>
-                <input type="range" name="blurAmount" min="0" max="100" value="50">
+                <input type="range" name="blurAmount" min="0" max="100" value="20">
             </div>
             <div class="slider-container">
                 <div class="slider-header">
                     <span class="slider-header-label">Detection Sensitivity</span>
-                    <span class="slider-value" id="strictness-value">30%</span>
+                    <span class="slider-value" id="strictness-value">20%</span>
                 </div>
-                <input type="range" name="strictness" min="0" max="1" step="0.01" value="0.3">
+                <input type="range" name="strictness" min="0" max="1" step="0.01" value="0.2">
             </div>
             <div class="setting-row">
                 <span style="color: #e2e8f0; font-weight: 500;">Grayscale</span>
@@ -245,9 +245,9 @@
         <div class="card">
             <div class="card-title collapsible" data-toggle="advanced-content">
                 Advanced Options
-                <span class="collapse-icon"></span>
+                <span class="collapse-icon">▼</span>
             </div>
-            <div class="card-content" id="advanced-content">
+            <div class="card-content" id="advanced-content" style="display: block;">
                 <div class="setting-row">
                     <span style="color: #e2e8f0; font-weight: 500;">Blur on load</span>
                     <label class="toggle-switch">
