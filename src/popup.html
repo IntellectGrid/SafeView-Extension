@@ -12,6 +12,8 @@
             color: #e2e8f0;
             font-size: 13px;
             width: 380px;
+            max-height: 600px;
+            overflow-y: auto;
         }
         .header {
             display: flex;
@@ -26,12 +28,7 @@
         .logo {
             width: 32px;
             height: 32px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
         }
         .header h1 { font-size: 18px; font-weight: 600; color: white; margin: 0; }
         .status-badge {
@@ -72,7 +69,7 @@
         }
         input:checked + .toggle-slider { background-color: #0ea5e9; }
         input:checked + .toggle-slider:before { transform: translateX(22px); }
-        .container { padding: 16px; max-height: 500px; overflow-y: auto; }
+        .container { padding: 16px; }
         .card {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.4));
             border: 1px solid rgba(148, 163, 184, 0.15);
@@ -208,13 +205,7 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <div class="logo" aria-hidden="true">
-                <!-- SafeView shield icon (reused from install.html) -->
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
-                    <path d="M12 2l7 3v5c0 5-3.5 9.7-7 12-3.5-2.3-7-7-7-12V5l7-3z" fill="#e6f8ff" opacity="0.95"/>
-                    <path d="M9.5 11.5c.5-1 1.6-1.6 2.5-1.6 1.8 0 3 1.6 3 3.1 0 1.8-1.6 3.5-3.6 3.5-1 0-2.1-.6-2.6-1.6-.3-.6-.3-1.2.2-2.1.2-.3.2-.3.3-.2z" fill="#06486b"/>
-                </svg>
-            </div>
+            <img src="assets/sv-icon-48.png" alt="SafeView" class="logo">
             <h1>SafeView</h1>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -280,7 +271,7 @@
                 Advanced Options
                 <span class="collapse-icon">▼</span>
             </div>
-            <div class="card-content" id="advanced-content" style="display: block;">
+            <div class="card-content collapsed" id="advanced-content" style="display: none;">
                 <div class="setting-row">
                     <span style="color: #e2e8f0; font-weight: 500;">Blur on load</span>
                     <div class="blur-timeout-group">
@@ -331,7 +322,7 @@
 
     <div class="footer">
         <button class="footer-btn"> Settings</button>
-        <button class="footer-btn">ℹ About</button>
+        <button class="footer-btn" id="about-btn">ℹ About</button>
     </div>
 
     <script src="popup.js"></script>

@@ -183,6 +183,14 @@ function setupCollapsibles() {
             }
         });
     });
+    
+    // About button click handler
+    const aboutBtn = document.getElementById("about-btn");
+    if (aboutBtn) {
+        aboutBtn.addEventListener("click", () => {
+            chrome.tabs.create({ url: chrome.runtime.getURL("src/install.html") });
+        });
+    }
 }
 
 function sendMsg(key) {
