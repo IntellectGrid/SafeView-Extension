@@ -1,255 +1,169 @@
 var settings = {};
 
+// Initialize popup when DOM is ready
+document.addEventListener('DOMContentLoaded', initPopup);
+window.addEventListener('load', initPopup);
+
+// Also run immediately in case DOM is already loaded
 initPopup();
 
-const refreshableSettings = [
-    "blurImages",
-    "blurVideos",
-    "blurMale",
-    "blurFemale",
-    "unblurImages",
-    "unblurVideos",
-    "blurryStartMode",
-    "strictness",
-    "whitelist",
-];
-
-const allSettings = ["blurAmount", "gray", ...refreshableSettings];
-
-var currentWebsite, refreshMessage, container;
-
-const initCalls = () => {
-    displaySettings(settings);
-    addListeners();
-};
-
 function initPopup() {
-    loadLocalSettings()
-        .then(() => getCurrentWebsite())
-        .then(() => {
-            if (document.readyState === "complete" || "interactive") {
-                initCalls();
-            } else {
-                document.addEventListener("DOMContentLoaded", initCalls);
-            }
-        });
+    loadSettingsAndDisplay();
 }
 
-function getCurrentWebsite() {
-    return new Promise(function (resolve) {
-        chrome.tabs?.query(
-            { active: true, currentWindow: true },
-            function (tabs) {
-                chrome.tabs.sendMessage(
-                    tabs[0].id,
-                    { type: "getCurrentWebsite" },
-                    function (response) {
-                        console.log("🚀 ~ response:", response);
-                        currentWebsite =
-                            response?.currentWebsite?.split("www.")?.[1] ??
-                            response?.currentWebsite ??
-                            null;
-                        resolve();
-                    }
-                );
-            }
-        );
+function loadSettingsAndDisplay() {
+    chrome.storage.sync.get(["hb-settings"], (result) => {
+        if (chrome.runtime.lastError) {
+            console.error("Storage error:", chrome.runtime.lastError);
+            return;
+        }
+        
+        // Load settings from storage, or use empty object
+        settings = result["hb-settings"] || {};
+        
+        // Ensure all default fields exist
+        ensureDefaultSettings();
+        
+        // Display loaded settings
+        displaySettings(settings);
+        
+        // Add event listeners
+        addListeners();
+        
+        // Setup collapsible sections
+        setupCollapsibles();
     });
 }
 
-function loadLocalSettings() {
-    return new Promise(function (resolve) {
-        chrome.storage.sync.get(["hb-settings"], function (storage) {
-            settings = storage["hb-settings"];
-            resolve();
-        });
-    });
-}
-
-function toggleAllInputs() {
-    if (container) {
-        container.style.opacity = settings.status ? 1 : 0.5;
-    }
-    allSettings.forEach(function (setting) {
-        document.querySelector("input[name=" + setting + "]").disabled =
-            !settings.status;
-    });
+function ensureDefaultSettings() {
+    // Ensure all essential settings have default values
+    if (typeof settings.status === 'undefined') settings.status = true;
+    if (typeof settings.blurAmount === 'undefined') settings.blurAmount = 20;
+    if (typeof settings.strictness === 'undefined') settings.strictness = 0.3;
+    if (typeof settings.gray === 'undefined') settings.gray = true;
+    if (typeof settings.blurImages === 'undefined') settings.blurImages = true;
+    if (typeof settings.blurVideos === 'undefined') settings.blurVideos = true;
+    if (typeof settings.blurryStartMode === 'undefined') settings.blurryStartMode = false;
+    if (typeof settings.unblurImages === 'undefined') settings.unblurImages = false;
+    if (typeof settings.unblurVideos === 'undefined') settings.unblurVideos = false;
+    if (typeof settings.hideVideoToggle === 'undefined') settings.hideVideoToggle = false;
 }
 
 function displaySettings(settings) {
-    console.log("display settings", settings);
-    document.querySelector("input[name=status]").checked = settings.status;
-    document.querySelector("input[name=blurryStartMode]").checked =
-        settings.blurryStartMode;
-    document.querySelector("input[name=blurAmount]").value =
-        settings.blurAmount;
-    document.getElementById("blur-amount-value").innerHTML =
-        `${settings.blurAmount}%`;
-    document.querySelector("input[name=gray]").checked = settings.gray ?? true;
-    document.querySelector("input[name=strictness]").value =
-        +settings.strictness;
-    document.querySelector("span[id=strictness-value]").innerHTML =
-        +settings.strictness * 100 + "%";
-    document.querySelector("input[name=blurImages]").checked =
-        settings.blurImages;
-    document.querySelector("input[name=blurVideos]").checked =
-        settings.blurVideos;
-    document.querySelector("input[name=blurMale]").checked = settings.blurMale;
-    document.querySelector("input[name=blurFemale]").checked =
-        settings.blurFemale;
-    document.querySelector("input[name=unblurImages]").checked =
-        settings.unblurImages;
-    document.querySelector("input[name=unblurVideos]").checked =
-        settings.unblurVideos;
-    displayWhiteList();
-    toggleAllInputs();
+    setCheckbox("status", settings.status !== false);
+    setRange("blurAmount", settings.blurAmount || 20);
+    setRange("strictness", settings.strictness || 0.3);
+    setCheckbox("gray", settings.gray !== false);
+    setCheckbox("blurImages", settings.blurImages !== false);
+    setCheckbox("blurVideos", settings.blurVideos !== false);
+    setCheckbox("blurryStartMode", settings.blurryStartMode || false);
+    setCheckbox("unblurImages", settings.unblurImages || false);
+    setCheckbox("unblurVideos", settings.unblurVideos || false);
+    setCheckbox("hideVideoToggle", settings.hideVideoToggle || false);
+    updateSliderDisplay();
 }
 
-/* addListeners - (1) Listen for changes to popup modal inputs (2) route to appropriate function  */
+function setCheckbox(name, checked) {
+    const el = document.querySelector(`input[name="${name}"]`);
+    if (el) el.checked = checked;
+}
+
+function setRange(name, value) {
+    const el = document.querySelector(`input[name="${name}"]`);
+    if (el) el.value = value;
+}
+
+function updateSliderDisplay() {
+    const blur = document.querySelector(`input[name="blurAmount"]`);
+    if (blur) {
+        document.getElementById("blur-value").textContent = blur.value + "%";
+    }
+    const strict = document.querySelector(`input[name="strictness"]`);
+    if (strict) {
+        document.getElementById("strictness-value").textContent = Math.round(strict.value * 100) + "%";
+    }
+}
+
 function addListeners() {
-    document
-        .querySelector("input[name=status]")
-        .addEventListener("change", updateStatus);
-    document
-        .querySelector("input[name=blurryStartMode]")
-        .addEventListener("change", updateCheckbox("blurryStartMode"));
-    document
-        .querySelector("input[name=blurImages]")
-        .addEventListener("change", updateCheckbox("blurImages"));
-    document
-        .querySelector("input[name=blurVideos]")
-        .addEventListener("change", updateCheckbox("blurVideos"));
-    document
-        .querySelector("input[name=blurMale]")
-        .addEventListener("change", updateCheckbox("blurMale"));
-    document
-        .querySelector("input[name=blurFemale]")
-        .addEventListener("change", updateCheckbox("blurFemale"));
-    document
-        .querySelector("input[name=blurAmount]")
-        .addEventListener("change", updateBlurAmount);
-    document
-        .querySelector("input[name=gray]")
-        .addEventListener("change", updateCheckbox("gray"));
-    document
-        .querySelector("input[name=strictness]")
-        .addEventListener("change", updateStrictness);
-    document
-        .querySelector("input[name=unblurImages]")
-        .addEventListener("change", updateCheckbox("unblurImages"));
-    document
-        .querySelector("input[name=unblurVideos]")
-        .addEventListener("change", updateCheckbox("unblurVideos"));
-    document
-        .getElementById("whitelist")
-        .addEventListener("change", updateWhitelist);
+    document.querySelectorAll("input[type='checkbox']").forEach(el => {
+        el.addEventListener("change", () => {
+            const key = el.name;
+            const value = el.checked;
+            
+            // Update local settings object
+            settings[key] = value;
+            
+            // Save to persistent storage
+            saveSettings();
+            
+            // Update UI if needed
+            updateSliderDisplay();
+            
+            // Send message to content script
+            sendMsg(key);
+        });
+    });
 
-    refreshMessage = document.querySelector("#refresh-message");
-    container = document.querySelector("#container");
-}
-
-function displayWhiteList(skipSet = false) {
-    const whiteListContainer = document.getElementById("whitelist-container");
-    const whiteList = document.getElementById("whitelist");
-    const websiteName = document.getElementById("website-name");
-    const whiteListStatusOn = document.getElementById("whitelist-status-on");
-    const whiteListStatusOff = document.getElementById("whitelist-status-off");
-    if (!currentWebsite) {
-        whiteListContainer.classList.add("hidden");
-        return;
-    } else {
-        whiteListContainer.classList.remove("hidden");
-    }
-    if (!skipSet) {
-        websiteName.innerHTML = currentWebsite;
-        whiteList.checked = !settings.whitelist.includes(currentWebsite);
-    }
-    if (whiteList.checked) {
-        whiteListStatusOn.classList.remove("hidden");
-        whiteListStatusOff.classList.add("hidden");
-    } else {
-        whiteListStatusOn.classList.add("hidden");
-        whiteListStatusOff.classList.remove("hidden");
-    }
-}
-
-function updateStatus() {
-    settings.status = document.querySelector("input[name=status]").checked;
-    chrome.storage.sync.set({ "hb-settings": settings });
-    toggleAllInputs();
-    sendUpdatedSettings("status");
-    showRefreshMessage("status");
-}
-
-function updateBlurAmount() {
-    settings.blurAmount = document.querySelector(
-        "input[name=blurAmount]"
-    ).value;
-    document.querySelector("span[id=blur-amount-value]").innerHTML =
-        settings.blurAmount + "%";
-    chrome.storage.sync.set({ "hb-settings": settings });
-    sendUpdatedSettings("blurAmount");
-    showRefreshMessage("blurAmount");
-}
-
-function updateStrictness() {
-    settings.strictness = document.querySelector(
-        "input[name=strictness]"
-    ).value;
-
-    document.querySelector("span[id=strictness-value]").innerHTML =
-        +settings.strictness * 100 + "%";
-
-    chrome.storage.sync.set({ "hb-settings": settings });
-    sendUpdatedSettings("strictness");
-    showRefreshMessage("strictness");
-}
-
-function updateCheckbox(key) {
-    return function () {
-        settings[key] = document.querySelector(
-            "input[name=" + key + "]"
-        ).checked;
-        chrome.storage.sync.set({ "hb-settings": settings });
-        sendUpdatedSettings(key);
-        showRefreshMessage(key);
-    };
-}
-
-
-function updateWhitelist(e) {
-    if (e.target.checked) {
-        settings.whitelist = settings.whitelist.filter(
-            (item) => item !== currentWebsite
-        );
-    } else {
-        settings.whitelist.push(currentWebsite);
-    }
-    chrome.storage.sync.set({ "hb-settings": settings });
-    sendUpdatedSettings("whitelist");
-    showRefreshMessage("whitelist");
-    displayWhiteList(true);
-}
-
-/* sendUpdatedSettings - Send updated settings object to tab.js to modify active tab blur CSS */
-function sendUpdatedSettings(key) {
-    const message = {
-        type: "updateSettings",
-        newSetting: {
-            key: key,
-            value: settings[key],
-        },
-    };
-
-    chrome.runtime.sendMessage(message);
-    chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-        var activeTab = tabs[0];
-        chrome.tabs.sendMessage(activeTab.id, message);
+    document.querySelectorAll("input[type='range']").forEach(el => {
+        el.addEventListener("input", () => {
+            const key = el.name;
+            const value = key === "strictness" ? parseFloat(el.value) : parseInt(el.value);
+            
+            // Update local settings object
+            settings[key] = value;
+            
+            // Update display immediately for better UX
+            updateSliderDisplay();
+            
+            // Send message to content script
+            sendMsg(key);
+        });
+        
+        // Save on change event (when user releases slider)
+        el.addEventListener("change", () => {
+            saveSettings();
+        });
     });
 }
 
-function showRefreshMessage(key) {
-    if (refreshableSettings.includes(key)) {
-        refreshMessage.classList.remove("hidden");
-    }
+function saveSettings() {
+    // Always save the complete settings object
+    chrome.storage.sync.set({ "hb-settings": settings }, () => {
+        if (chrome.runtime.lastError) {
+            console.error("Error saving settings:", chrome.runtime.lastError);
+        } else {
+            console.log("Settings saved successfully");
+        }
+    });
+}
+
+function setupCollapsibles() {
+    document.querySelectorAll(".card-title.collapsible").forEach(title => {
+        title.addEventListener("click", function() {
+            const id = this.getAttribute("data-toggle");
+            const content = document.getElementById(id);
+            const icon = this.querySelector(".collapse-icon");
+            if (content) {
+                content.classList.toggle("collapsed");
+                icon.classList.toggle("open");
+            }
+        });
+    });
+}
+
+function sendMsg(key) {
+    try {
+        chrome.runtime.sendMessage({
+            type: "updateSettings",
+            newSetting: {key: key, value: settings[key]}
+        });
+        chrome.tabs.query({currentWindow: true, active: true}, tabs => {
+            if (tabs && tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    type: "updateSettings",
+                    newSetting: {key: key, value: settings[key]}
+                });
+            }
+        });
+    } catch(e) {}
 }
