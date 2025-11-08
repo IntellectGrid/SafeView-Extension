@@ -19,8 +19,6 @@ const allSettings = ["blurAmount", "gray", ...refreshableSettings];
 var currentWebsite, refreshMessage, container;
 
 const initCalls = () => {
-    const browserLang = navigator.language?.split("-")[0] ?? "en";
-    changeLanguage(settings.language ?? browserLang, settings);
     displaySettings(settings);
     addListeners();
 };
@@ -143,9 +141,6 @@ function addListeners() {
     document
         .querySelector("input[name=unblurVideos]")
         .addEventListener("change", updateCheckbox("unblurVideos"));
-    document.getElementById("language").addEventListener("change", function () {
-        changeLanguage(this.value, settings);
-    });
     document
         .getElementById("whitelist")
         .addEventListener("change", updateWhitelist);
@@ -222,26 +217,6 @@ function updateCheckbox(key) {
     };
 }
 
-function changeLanguage(lang, settings) {
-    document.body.lang = lang;
-    document.getElementById("container").dir = HB_TRANSLATIONS_DIR[lang];
-
-    const translations = getTranslations(settings)?.[lang];
-    const keys = Object.keys(translations);
-    keys.forEach((key) => {
-        const elements = document.querySelectorAll(key);
-        elements.forEach((element) => {
-            element.innerHTML = translations[key];
-            // change direction of element
-            if (HB_TRANSLATIONS_DIR[lang]) {
-                element.dir = HB_TRANSLATIONS_DIR[lang];
-            }
-        });
-    });
-
-    settings.language = lang;
-    chrome.storage.sync.set({ "hb-settings": settings });
-}
 
 function updateWhitelist(e) {
     if (e.target.checked) {
