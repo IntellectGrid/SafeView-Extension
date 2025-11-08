@@ -101,7 +101,6 @@ function displaySettings(settings) {
         settings.unblurImages;
     document.querySelector("input[name=unblurVideos]").checked =
         settings.unblurVideos;
-    document.getElementById("language").value = settings.language;
     displayWhiteList();
     toggleAllInputs();
 }
