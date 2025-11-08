@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to SafeView</title>
+    <style>
+        /* Reset */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+
+        /* Dark blue background with subtle texture gradient */
+        body {
+            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            background: radial-gradient( circle at 10% 20%, rgba(22,40,72,0.6), transparent 20% ),
+                        linear-gradient(180deg, #071022 0%, #0d2238 60%, #0b2540 100% );
+            color: #e6eef8;
+            -webkit-font-smoothing:antialiased;
+            display: flex;
+            align-items: center; /* vertical center */
+            justify-content: center; /* horizontal center */
+            padding: 24px;
+        }
+
+        /* Card container */
+        .container {
+            width: 100%;
+            max-width: 860px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            border-radius: 14px;
+            padding: 32px 36px;
+            box-shadow: 0 8px 30px rgba(3,10,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        header.top {
+            display:flex; align-items:center; gap:14px; margin-bottom:18px;
+        }
+
+        .logo {
+            width:56px; height:56px; background:linear-gradient(135deg,#2b87c8,#1c63a6);
+            border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+            box-shadow: 0 4px 14px rgba(20,50,90,0.35);
+        }
+
+        .logo svg { width:30px; height:30px; }
+
+        h1 { font-size:1.75rem; color:#eaf6ff; letter-spacing: -0.02em; }
+        h1 strong { color:#7fd3ff; font-weight:700; }
+
+        p.lead { color: #cfe9ff; opacity:0.95; margin-top:8px; font-size:0.98rem; line-height:1.5; }
+
+        h2 { color:#9fd6ff; margin-top:22px; font-size:1.05rem; }
+
+        p, ul { color: #d7eefe; font-size:0.985rem; line-height:1.6; }
+
+        ul.checks { list-style:none; padding-left:0; margin-top:10px; display:grid; gap:8px; }
+        ul.checks li { display:flex; gap:10px; align-items:flex-start; }
+
+        .checkmark {
+            min-width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
+            background: rgba(127,211,255,0.12); border-radius:6px; color:#7fd3ff; font-weight:600;
+            flex-shrink:0; margin-top:2px;
+        }
+
+        .cta-btn {
+            margin-top:20px; display:inline-block; background: linear-gradient(180deg,#2b87c8,#1c63a6);
+            color: #021629; padding:12px 22px; border-radius:10px; border:none; font-weight:700; cursor:pointer;
+            box-shadow: 0 8px 20px rgba(17,76,126,0.28); transition:transform .12s ease, box-shadow .12s ease;
+        }
+        .cta-btn:active { transform: translateY(1px); }
+        .cta-btn:hover { box-shadow: 0 12px 30px rgba(17,76,126,0.36); }
+
+        /* Responsive tweaks */
+        @media (max-width:640px){
+            .container{ padding:20px; border-radius:12px }
+            h1 { font-size:1.45rem }
+        }
+
+        /* subtle fade-in */
+        .container { opacity:0; transform: translateY(8px); animation:fadeIn .6s ease forwards; }
+        @keyframes fadeIn { to { opacity:1; transform:none } }
+    </style>
+</head>
+<body>
+    <div class="container" role="main">
+        <header class="top">
+            <div class="logo" aria-hidden="true">
+                <!-- simple shield/icon -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 2l7 3v5c0 5-3.5 9.7-7 12-3.5-2.3-7-7-7-12V5l7-3z" fill="#e6f8ff" opacity="0.95"/>
+                    <path d="M9.5 11.5c.5-1 1.6-1.6 2.5-1.6 1.8 0 3 1.6 3 3.1 0 1.8-1.6 3.5-3.6 3.5-1 0-2.1-.6-2.6-1.6-.3-.6-.3-1.2.2-2.1.2-.3.2-.3.3-.2z" fill="#06486b"/>
+                </svg>
+            </div>
+            <div>
+                <h1>Welcome to <strong>SafeView</strong>!</h1>
+                <p class="lead">Thank you for choosing to install the <strong>SafeView</strong> extension. We are dedicated to providing a safe and secure online experience by automatically filtering inappropriate content across social media platforms and websites.</p>
+            </div>
+        </header>
+
+        <section>
+            <h2>What is SafeView?</h2>
+            <p>SafeView is an advanced content moderation tool designed to detect and blur suggestive or NSFW (Not Safe For Work) content on the web. Our powerful deep learning models analyze images, videos, and other media to ensure you are browsing safely.</p>
+
+            <h2>Why Choose SafeView?</h2>
+            <ul class="checks" aria-label="key benefits">
+                <li><span class="checkmark">✓</span><span><strong>Real-time Filtering</strong>: Automatically detects and censors NSFW content as you browse.</span></li>
+                <li><span class="checkmark">✓</span><span><strong>User-Controlled Settings</strong>: Customize your filtering preferences, including the intensity of blur effects.</span></li>
+                <li><span class="checkmark">✓</span><span><strong>Privacy-Focused</strong>: No personal data is sent to external servers, ensuring complete privacy.</span></li>
+                <li><span class="checkmark">✓</span><span><strong>Seamless Integration</strong>: Easily integrates with your browser without affecting performance.</span></li>
+            </ul>
+
+            <h2>Getting Started</h2>
+            <p>Once installed, SafeView will automatically start moderating content as you browse social media and websites. You can adjust your settings through the SafeView icon in your browser toolbar.</p>
+            <p>We recommend you explore the settings to customize the level of content filtering that best suits your needs. Stay safe online with SafeView!</p>
+
+            <button id="get-started" class="cta-btn" type="button">Get Started</button>
+        </section>
+    </div>
+    <script>
+        (function(){
+            const btn = document.getElementById('get-started');
+            if(!btn) return;
+            btn.addEventListener('click', function(){
+                const url = 'https://www.instagram.com/';
+                // Try to open a new tab/window
+                const newTab = window.open(url, '_blank', 'noopener,noreferrer');
+                if(!newTab){
+                    // Popup blocked fallback: create an anchor and click it
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+
+                // Try to close this tab. If the browser blocks close(), replace the location as a fallback.
+                setTimeout(()=>{
+                    try{
+                        window.close();
+                        // If still open (close was blocked), navigate away to about:blank
+                        if(!window.closed){
+                            window.location.replace('about:blank');
+                        }
+                    }catch(e){
+                        // final fallback
+                        window.location.replace('about:blank');
+                    }
+                }, 200);
+            });
+        })();
+    </script>
+</body>
+</html>
