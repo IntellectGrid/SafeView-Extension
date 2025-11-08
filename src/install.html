@@ -38,12 +38,12 @@
         }
 
         .logo {
-            width:56px; height:56px; background:linear-gradient(135deg,#2b87c8,#1c63a6);
+            width:56px; height:56px;
             border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
             box-shadow: 0 4px 14px rgba(20,50,90,0.35);
         }
 
-        .logo svg { width:30px; height:30px; }
+        .logo img { width:100%; height:100%; border-radius:10px; }
 
         h1 { font-size:1.75rem; color:#eaf6ff; letter-spacing: -0.02em; }
         h1 strong { color:#7fd3ff; font-weight:700; }
@@ -86,11 +86,7 @@
     <div class="container" role="main">
         <header class="top">
             <div class="logo" aria-hidden="true">
-                <!-- simple shield/icon -->
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M12 2l7 3v5c0 5-3.5 9.7-7 12-3.5-2.3-7-7-7-12V5l7-3z" fill="#e6f8ff" opacity="0.95"/>
-                    <path d="M9.5 11.5c.5-1 1.6-1.6 2.5-1.6 1.8 0 3 1.6 3 3.1 0 1.8-1.6 3.5-3.6 3.5-1 0-2.1-.6-2.6-1.6-.3-.6-.3-1.2.2-2.1.2-.3.2-.3.3-.2z" fill="#06486b"/>
-                </svg>
+                <img src="assets/sv-icon-128.png" alt="SafeView">
             </div>
             <div>
                 <h1>Welcome to <strong>SafeView</strong>!</h1>
@@ -117,41 +113,6 @@
             <button id="get-started" class="cta-btn" type="button">Get Started</button>
         </section>
     </div>
-    <script>
-        (function(){
-            const btn = document.getElementById('get-started');
-            if(!btn) return;
-            btn.addEventListener('click', function(){
-                const url = 'https://www.instagram.com/';
-                // Try to open a new tab/window
-                const newTab = window.open(url, '_blank', 'noopener,noreferrer');
-                if(!newTab){
-                    // Popup blocked fallback: create an anchor and click it
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }
-
-                // Try to close this tab. If the browser blocks close(), replace the location as a fallback.
-                setTimeout(()=>{
-                    try{
-                        window.close();
-                        // If still open (close was blocked), navigate away to about:blank
-                        if(!window.closed){
-                            window.location.replace('about:blank');
-                        }
-                    }catch(e){
-                        // final fallback
-                        window.location.replace('about:blank');
-                    }
-                }, 200);
-            });
-        })();
-    </script>
+    <script src="install.js"></script>
 </body>
 </html>
