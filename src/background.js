@@ -16,7 +16,7 @@ const defaultSettings = {
     whitelist: [],
 };
 
-chrome.runtime.onInstalled.addListener(function () {
+chrome.runtime.onInstalled.addListener(function (details) {
     chrome.storage.sync.get(["hb-settings"], function (result) {
         if (
             result["hb-settings"] === undefined ||
@@ -30,9 +30,30 @@ chrome.runtime.onInstalled.addListener(function () {
             });
         }
     });
+
+    // context menu: "enable detection on this video"
+    chrome.contextMenus.create({
+        id: "enable-detection",
+        title: "Enable for this video",
+        contexts: ["all"],
+        type: "checkbox",
+        enabled: true,
+        checked: true,
+    });
+
+    if (details?.reason === "install") {
+        chrome.tabs.create({
+            url: chrome.runtime.getURL("src/install.html"),
+        });
+    } else if (details?.reason === "update") {
+    }
 });
 
-const createOffscreenDoc = () => {
+const createOffscreenDoc = async () => {
+    if (await chrome.offscreen.hasDocument()) {
+        console.log("offscreen document already exists");
+        return;
+    }
     chrome?.offscreen
         .createDocument({
             url: chrome.runtime.getURL("src/offscreen.html"),
@@ -42,12 +63,17 @@ const createOffscreenDoc = () => {
         .then((document) => {
             console.log("offscreen document created");
         })
-        .finally(() => {});
+        .finally(() => { });
 };
 
 createOffscreenDoc();
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // Guard against undefined request
+    if (!request) {
+        return false;
+    }
+
     if (request.type === "getSettings") {
         chrome.storage.sync.get(["hb-settings"], function (result) {
             sendResponse(result["hb-settings"]);
@@ -63,7 +89,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     : "Please enable video detection in settings",
             });
         });
-        return true;
+        return true; // Will respond asynchronously
     } else if (request.type === "video-status") {
         chrome.contextMenus.update("enable-detection", {
             checked: request.status,
@@ -74,6 +100,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome?.offscreen?.closeDocument();
         // recreate the offscreen document
         createOffscreenDoc();
+        return false; // Synchronous, no response needed
     } else if (request.type === "updateSettings") {
         // react to live setting changes for context menu visibility
         const { key, value } = request.newSetting || {};
@@ -101,18 +128,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             });
         }
+        return false; // Synchronous, no response needed
     }
+
+    return false; // Default: no response for unknown message types
 });
 
-// context menu: "enable detection on this video"
-chrome.contextMenus.create({
-    id: "enable-detection",
-    title: "Enable for this video",
-    contexts: ["all"],
-    type: "checkbox",
-    enabled: true,
-    checked: true,
-});
+
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     console.log("HB== context menu clicked", info, tab);
@@ -129,16 +151,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }
 
     return true;
-});
-
-// on install, onboarding
-chrome.runtime.onInstalled.addListener(function (details) {
-    if (details?.reason === "install") {
-        chrome.tabs.create({
-            url: chrome.runtime.getURL("src/install.html"),
-        });
-    } else if (details?.reason === "update") {
-    }
 });
 
 // on uninstall
