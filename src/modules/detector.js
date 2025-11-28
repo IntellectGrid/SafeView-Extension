@@ -517,12 +517,17 @@ class Detector {
         const channels = 3;
         const normalized = new Float32Array(width * height * channels);
 
+        // ImageNet mean and std
+        const mean = [0.485, 0.456, 0.406];
+        const std = [0.229, 0.224, 0.225];
+
         // Transpose from NHWC (R,G,B,R,G,B...) to NCHW (RRR...GGG...BBB...)
         for (let i = 0; i < width * height; i++) {
             // pixelData is RGBA, so we skip alpha (index 3)
-            const r = pixelData[i * 4] / divisor;
-            const g = pixelData[i * 4 + 1] / divisor;
-            const b = pixelData[i * 4 + 2] / divisor;
+            // Normalize to 0-1 then apply ImageNet normalization
+            const r = (pixelData[i * 4] / divisor - mean[0]) / std[0];
+            const g = (pixelData[i * 4 + 1] / divisor - mean[1]) / std[1];
+            const b = (pixelData[i * 4 + 2] / divisor - mean[2]) / std[2];
 
             // NCHW layout
             normalized[i] = r;                     // R plane
