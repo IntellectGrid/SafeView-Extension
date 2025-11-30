@@ -42,12 +42,11 @@ const setStyle = ({ detail: settings }) => {
     if (shouldUnblurVideosOnHover)
         unblurSelectors.push("video.hb-blur:hover");
     unblurSelectors = unblurSelectors.join(", ");
-    
+
     hbStyleSheet.innerHTML = `
     ${blurSelectors} {
-      filter: blur(${_settings.getBlurAmount()}px) ${
-          _settings.isGray() ? "brightness(0%)" : ""
-      } !important;
+      filter: blur(${_settings.getBlurAmount()}px) ${_settings.isGray() ? "brightness(0%)" : ""
+        } !important;
       transition: filter 0.3s ease !important;
       opacity: unset !important;
     }
@@ -72,13 +71,10 @@ const setStyle = ({ detail: settings }) => {
 	}
 
 	@keyframes hb-blur-temp {
-		0% { filter: blur(${_settings.getBlurAmount()}px) ${
-            _settings.isGray() ? "brightness(0%)" : ""
+		0% { filter: blur(${_settings.getBlurAmount()}px) ${_settings.isGray() ? "brightness(0%)" : ""
         }; }
-		95% { filter: blur(${_settings.getBlurAmount()}px) ${
-            _settings.isGray() ? "brightness(0%)" : ""
+		100% { filter: blur(${_settings.getBlurAmount()}px) ${_settings.isGray() ? "brightness(0%)" : ""
         }; }
-		100% { filter: blur(0px) ${_settings.isGray() ? "brightness(100%)" : ""}; }
 	}
   `;
 };

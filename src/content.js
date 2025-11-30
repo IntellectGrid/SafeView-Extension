@@ -13,9 +13,16 @@ const attachAllListeners = () => {
 
     // listen for getCurrentWebsite from popup.js
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (!request) {
+            return false;
+        }
+        
         if (request.type === "getCurrentWebsite") {
             sendResponse({ currentWebsite: window.location.hostname });
+            return true;
         }
+        
+        return false;
     });
 };
 

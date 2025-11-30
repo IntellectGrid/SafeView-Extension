@@ -3,7 +3,14 @@
     "name": "SafeView",
     "description": "Protect your privacy by auto detecting & blurring images and videos of unwanted explicit NSFW content.",
     "version": "0.2.6",
-    "permissions": ["storage", "offscreen", "contextMenus"],
+    "permissions": [
+        "storage",
+        "offscreen",
+        "contextMenus"
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    },
     "author": "hk151109",
     "action": {
         "default_title": "SafeView",
@@ -19,15 +26,25 @@
     },
     "content_scripts": [
         {
-            "js": ["dist/content.js"],
-            "matches": ["https://*/*", "http://*/*"],
+            "js": [
+                "dist/content.js"
+            ],
+            "matches": [
+                "https://*/*",
+                "http://*/*"
+            ],
             "run_at": "document_start"
         }
     ],
     "web_accessible_resources": [
         {
-            "resources": ["src/assets/*"],
-            "matches": ["https://*/*", "http://*/*"]
+            "resources": [
+                "src/assets/*"
+            ],
+            "matches": [
+                "https://*/*",
+                "http://*/*"
+            ]
         }
     ]
 }

@@ -43,12 +43,14 @@ class Queue {
                 error,
             });
         } finally {
-            this.activeProcessing--;
             node.src = "";
             node = null;
             // if there are more images to process, process them
             if (this.detectionQueue.length) {
                 this.handleElementProcessing(...this.detectionQueue.shift());
+            } else {
+                // Only decrement when we actually stop processing
+                this.activeProcessing--;
             }
         }
     }
